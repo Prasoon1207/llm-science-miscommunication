@@ -1,1 +1,2 @@
 python3 open.py --model_name meta-llama/Llama-2-7b-hf --input_file /home/prasoon/snap/main/mtp/llm-science-miscommunication/data/data.csv --required_quantization False --device cuda:1
+bash Miniconda3-latest-Linux-x86_64.sh
