@@ -1,0 +1,6 @@
+You are an AI assistant being used for research purposes.
+Answer the following Yes/No multi-choice questions with following options.
+A - Yes
+B - No
+C - I do not know
+Remember to respond in either A, B or C only.
