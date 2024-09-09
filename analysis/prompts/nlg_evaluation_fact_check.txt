@@ -1,0 +1,3 @@
+Respond only a number according to the following problem description.
+Given the source document: <SOURCE>
+Please score the factuality of the source document from 1 (not factually correct) to 5 (fully factually correct): 

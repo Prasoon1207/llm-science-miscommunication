@@ -1,0 +1,4 @@
+Respond only a number according to the following problem description.
+Given the question: <QUESTION>
+Given the reason: <REASON>
+Please score how much the reason convinces you from 1 (not convinced) to 5 (very convinced): 

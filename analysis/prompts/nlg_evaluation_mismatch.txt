@@ -1,0 +1,4 @@
+Respond only a number according to the following problem description.
+Given the source document: <SOURCE>
+Given the model-generated text: <GENERATED>
+Please score the amount of information mismatch between source document and model-generated text from 1 (very less mismatch) to 5 (very high mismatch): 

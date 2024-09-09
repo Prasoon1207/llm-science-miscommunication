@@ -1,0 +1,4 @@
+Context: <CONTEXT>
+Sentence: <SENTENCE>
+Is the sentence supported by the context above?
+Answer only in Yes or No:
