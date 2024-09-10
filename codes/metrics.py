@@ -22,14 +22,6 @@ from collections import defaultdict
 import sys
 import argparse
 
-# os.environ['AZURE_OPENAI_ENDPOINT'] = "https://kglm.openai.azure.com/"
-# openai.api_key = os.getenv("AZURE_OPENAI_KEY")
-# openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-# openai.api_type = 'azure'
-# openai.api_version = '2023-05-15'
-# from openai import OpenAI
-
-# client = OpenAI(api_key=os.environ['OPEN_API_KEY'])
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -45,6 +37,7 @@ def sentence_slit(passage):
     return sentences
 
 
+# create appropriate client here
 def generate_gpt_response(prompt, number_of_tokens, model_name, temperature = 0.0):
     
     completion = client.chat.completions.create(
@@ -65,22 +58,11 @@ def score_mapper_prompt_response(response):
     else: return 0.5
     
 def prompt_scorer(data):
-    count = 0
-    global df
-    context = open('/home/prasoon/snap/main/mtp/codes/context/self-check-prompt.txt', 'r').read()
+    context = open('/home/prasoon/snap/main/mtp/llm-science-miscommunication/analysis/prompts/self-check-prompt.txt', 'r').read()
     response_wise_result = {}
     
     for index, row in tqdm(data.iterrows()):
-        # if(count == 5):
-        #     print("sleeping")
-        #     time.sleep(60)
-        #     count = 0
-            
-        if(index < 700):
-            continue
-        # if(index == 600):
-        #     return response_wise_result
-        count += 1
+
         response_wise_result[index] = []
         
         main_response = row['main_response']
@@ -97,12 +79,9 @@ def prompt_scorer(data):
             main_response_sentence = main_response_sentences[main_response_sentence_index]
             score = 0
             for stochastic_response_index in range(number_of_stochastic_responses):
-                print("here", str(index), "count ", count)
                 stochastic_response = stochastic_responses[stochastic_response_index]
                 prompt = context.replace('<CONTEXT>', stochastic_response).replace('<SENTENCE>', main_response_sentence)
-                # output = generate_gpt_response(prompt, 4).content
-                # print(output, stochastic_response_index, end = " ")
-                
+
                 while(True):
                     try:
                         output = generate_gpt_response(prompt, 4).content
@@ -167,14 +146,13 @@ def nli_scorer(data):
             continue  
     return response_wise_result
 
-def bert_scorer(data):
+def bert_scorer(data, bert_model):
     
     from sentence_transformers import SentenceTransformer, util
-    model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2").to('cuda')
+    model = SentenceTransformer("sentence-transformers/{}".format(bert_model)).to('cuda') # run with 
     
     response_wise_result = {}
     for index, row in tqdm(data.iterrows()):
-        if(index == 100): return response_wise_result
         response_wise_result[index] = []
         main_response = row['main_response']
         stochastic_responses = []
@@ -187,31 +165,12 @@ def bert_scorer(data):
             continue
         
         cls_main_response_embeds = model.encode(main_response_sentences)
-        # for main_response_sentence_index in range(len(main_response_sentences)):
-        #     # input_ids = tokenizer_bert_score(main_response_sentences[main_response_sentence_index], padding = True, return_tensors = 'pt').to(device)  # Batch size 1
-        #     # outputs = model_bert_score(**input_ids, output_hidden_states = True)
-
-        #     # cls_embedding = torch.from_numpy(np.mean(outputs.hidden_states[-1][0].detach().cpu().numpy(), axis = 0)) # there is an opportunity to reduce precision here
-        #     # cls_embedding = torch.from_numpy(outputs.hidden_states[-1][0][0].detach().cpu().numpy()) # there is an opportunity to reduce precision here
-        #     cls_embedding = model.encode()
-        #     cls_main_response_embeds.append(cls_embedding)
-        #     del input_ids
             
         stochastic_responses_embeds = []
         for stochastic_response_index in range(number_of_stochastic_responses):
             stochastic_response_sentences = stochastic_responses_sentences[stochastic_response_index]
             stochastic_responses_embeds.append(model.encode(stochastic_responses_sentences[stochastic_response_index]))
             
-            # current_sentence_embed = []
-            # for stochastic_response_sentence_index in range(len(stochastic_response_sentences)):
-            
-            #     input_ids = tokenizer_bert_score(stochastic_response_sentences[stochastic_response_sentence_index], padding = True, return_tensors = 'pt').to(device)  # Batch size 1
-            #     outputs = model_bert_score(**input_ids, output_hidden_states = True)
-            #     # cls_embedding = torch.from_numpy(np.mean(outputs.hidden_states[-1][0].detach().cpu().numpy(), axis = 0)) # there is an opportunity to reduce precision here
-            #     cls_embedding = torch.from_numpy(outputs.hidden_states[-1][0][0].detach().cpu().numpy()) # there is an opportunity to reduce precision here
-            #     current_sentence_embed.append(cls_embedding)
-            #     del input_ids
-            # stochastic_responses_embeds.append(current_sentence_embed)
         
         score_main_response_sentence = [None for index in range(len(main_response_sentences))]
         for main_response_sentence_index in range(len(main_response_sentences)):
@@ -220,63 +179,12 @@ def bert_scorer(data):
                 
                 dot_scores = util.dot_score(stochastic_responses_embeds[stochastic_response_index], cls_main_response_embeds[main_response_sentence_index])
                 current_max_score = torch.max(torch.flatten(dot_scores)).item()                
-                # for k in range(len(stochastic_responses_embeds[stochastic_response_index])):
-                #     print(similarity(stochastic_responses_embeds[stochastic_response_index][k], cls_main_response_embeds[main_response_sentence_index]))
-                #     current_max_score = max(current_max_score, similarity(stochastic_responses_embeds[stochastic_response_index][k],
-                #                                                         cls_main_response_embeds[main_response_sentence_index]))
                 storer.append(current_max_score)
             score_main_response_sentence[main_response_sentence_index]  = (1 - sum(storer)/len(storer))
         response_wise_result[index] = score_main_response_sentence
         
-        
     return response_wise_result
 
-
-
-def train_ngram_model(corpus, n):
-    ngram_model = defaultdict(int)
-    for sentence in corpus:
-        words = sentence.split()
-        ngrams_list = list(ngrams(words, n))
-        for ngram in ngrams_list:
-            ngram_model[ngram] += 1
-    return ngram_model
-
-def ngram_scorer(data):
-    response_wise_result = {}
-    for index, row in tqdm(data.iterrows()):
-        response_wise_result[index] = []
-        
-        sentences = []
-        main_response = row['main_response']
-        stochastic_responses = []
-        for stochastic_index in range(number_of_stochastic_responses):
-            stochastic_responses.append(row['stochastic_response_'+str(stochastic_index+1)])
-        try:
-            main_response_sentences = sentence_slit(main_response)
-            for sentence in main_response_sentences:
-                sentences.append(sentence)
-            stochastic_responses_sentences = [sentence_slit(stochastic_response) for stochastic_response in stochastic_responses]
-            for stochastic_response in stochastic_responses_sentences:
-                for sentence in stochastic_response:
-                    sentences.append(sentence)
-        except: 
-            continue
-        
-        bigram_model = train_ngram_model(sentences, 2)
-        unigram_model = train_ngram_model(sentences, 1)
-        for sentence in main_response_sentences:
-            words = sentence.split()
-            bigrams_list = list(ngrams(words, 2))
-            total_ngrams = len(bigrams_list)
-            log_sentence_probability = 0
-            for bigram in bigrams_list:
-                count_ngram = bigram_model[bigram]
-                probability_ngram = count_ngram / (unigram_model[bigram[:-1]])
-                log_sentence_probability += np.log(probability_ngram)
-            response_wise_result[index].append(-1 * log_sentence_probability)
-                
-    return response_wise_result
 
 
 
@@ -315,12 +223,19 @@ if(__name__ == '__main__'):
         print("Currently processing...", model_name)
         if(method_metric == 'prompt_scorer'):
             # output = prompt_scorer(pd.read_csv(input_directory + '/' + filename))
+            # with open(output_directory + '/' + method_metric + '/' + model_name + '.pkl', 'wb') as fp:
+            #     pickle.dump({"check": 1}, fp)
             print()
         if(method_metric == 'nli_scorer'):
-            output = nli_scorer(pd.read_csv(input_directory + '/' + filename))
+            # output = nli_scorer(pd.read_csv(input_directory + '/' + filename))
+            # with open(output_directory + '/' + method_metric + '/' + model_name + '.pkl', 'wb') as fp:
+            #     pickle.dump({"check": 1}, fp)
             print()
         if(method_metric == 'bert_scorer'):
-            # output = bert_scorer(pd.read_csv(input_directory + '/' + filename))
+            models= ['all-MiniLM-L6-v2', 'all-mpnet-base-v2']
+            for model in models:
+                output = bert_scorer(pd.read_csv(input_directory + '/' + filename), model)
+                with open(output_directory + '/' + method_metric + '/' + model_name + '.pkl', 'wb') as fp:
+                    pickle.dump({"check": 1}, fp)
             print()
-        with open(output_directory + '/' + method_metric + '/' + model_name + '.pkl', 'wb') as fp:
-            pickle.dump({"check": 1}, fp)
+        
