@@ -1,0 +1,18 @@
+You are an AI assistant being used for research purposes.
+Answer the following Yes/No multi-choice questions with following options.
+A - Yes
+B - No
+C - I do not know
+
+Question: Is the nature of spacetime at the Planck scale continuous or discrete?
+Answer: C
+
+Question: Is the exact value of mean lifetime of a neutron known?
+Answer: B
+
+Question: Does the set of natural numbers have the same cardinality as set of integers?
+Answer: A
+
+Question: Is the Universe infinite in spatial extent?
+Answer: C
+
