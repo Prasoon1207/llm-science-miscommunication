@@ -12,6 +12,12 @@ For any questions about the paper or the code, please contact the first authors 
 }
 ```
 
+## Content
+
+1. [Installation](#installation)
+2. [SCiPS-QA](#scipsqa)
+3. [Benchmark](#benchmark)
+
 ### Installation
 
 #### Via `requirements.txt` (using `pip`)
@@ -27,3 +33,6 @@ To create a conda environment with the required dependencies, use the following 
 ```bash
 conda env create -f environment.yml
 ```
+
+### SCiPS-QA
+### Benchmark
