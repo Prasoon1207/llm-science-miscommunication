@@ -1,5 +1,5 @@
 # Can LLMs Replace Neil DeGrasse Tyson: Evaluating Reliability of LLMs as Science Communicators
-This is the official repository for our <a href = 'https://openreview.net/forum?id=Eqpnq1sC43'> Can LLMs Replace Neil DeGrasse Tyson: Evaluating the Reliability of LLMs as Science Communicators </a> (Prasoon Bajpai, Subhabrata Dutta, Niladri Chatterjee and Tanmoy Chakraborty, 2024)<br>
+This is the official repository for our <a href = 'https://openreview.net/forum?id=Eqpnq1sC43'> Can LLMs Replace Neil DeGrasse Tyson?: Evaluating the Reliability of LLMs as Science Communicators </a> (Prasoon Bajpai, Subhabrata Dutta, Niladri Chatterjee and Tanmoy Chakraborty, 2024)<br>
 In this work, we conduct a large-scale probing of 14 open-source language models (Llama-2, Llama-3, Mistral) and 3 GPT models (text-davinci-003, GPT-3.5-Turbo, GPT-4-Turbo) using our new dataset **SCiPS-QA**, a collection of 742 boolean scientific problems grounded on complex scientific objects. The objective is to stress test and unveil the limitations of popular language models in communicating (and verifying) extremely complex scientific ideas.
 ## Contact and Citations
 Please contact the first author regarding any queries about the paper or code. If you find our code or paper useful, please cite the paper:
