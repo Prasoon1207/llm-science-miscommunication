@@ -40,3 +40,12 @@ We construct a boolean QA dataset with questions from subjects: Physics, Chemist
 {question: Do the homotopy groups of O(∞) contain a period-2 phenomenon with respect to dimension? , answer: A, time_open: NA, gold_reason: The groups $$ \pi_0 $$ and $$ \pi_1 $$ are both isomorphic to $$ \mathbb{Z}_2 $$, demonstrating a period-2 phenomenon in these dimensions., gold_reason_reference: NA}
 ```
 ### Benchmark
+
+You can reproduce the benchmark results by running _open.py_ file in the 'codes/' directory as follows:
+```
+python3 open.py --input_file <directory_path>/data.csv --model_name Llama-2-7b-hf --required_quantization False --device_number 2 --output_directory <directory_path>
+
+```
+* _model_name_: We loaded our download models present in a directory '/home/models' and saved with name _model_name_
+* _required_quantization_: We ran Llama-2-7b-hf on <a href = 'https://huggingface.co/blog/4bit-transformers-bitsandbytes'>4-bit</a> quantization. The exact _quantization_config_ is present in _open.py_
+* _device_number_: PCI_BUS_ORDER of the CUDA device we ran our processes on. (We ran all our experiments on a single A100 GPU).
