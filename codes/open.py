@@ -11,7 +11,7 @@ import argparse
 from transformers import BitsAndBytesConfig
 
 
-# used only if 'required_config' is set to True
+
 quantization_config = BitsAndBytesConfig(
         
             load_in_4bit=True,
@@ -65,7 +65,6 @@ if __name__ == '__main__':
     master_list = []
     
     for index, row in tqdm(df.iterrows()):
-        
         current_question = row['question']
         current_answer = row['answer']
         encoder_input_str = context + 'Question: ' + current_question + '\n'+ 'Answer: '
